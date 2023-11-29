@@ -1,0 +1,9 @@
+#cloud-config
+users:
+  - name: ubuntu
+    groups: users, admin
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ssh-rsa <key>
+package_update: true
