@@ -4,12 +4,12 @@ resource "hcloud_ssh_key" "default" {
 }
 
 resource "hcloud_network" "eu_network" {
-  name = "eu_network"
+  name     = "eu_network"
   ip_range = "192.168.100.0/24"
 }
 
 resource "hcloud_network" "us_east_network" {
-  name = "us_east_network"
+  name     = "us_east_network"
   ip_range = "192.168.200.0/24"
 }
 
@@ -22,9 +22,9 @@ resource "hcloud_network_subnet" "eu_network_subnet" {
 
 resource "hcloud_network_subnet" "us_east_network_subnet" {
   type         = "cloud"
-  network_id   = hcloud_network.eu_network.id
-  network_zone = "eu-central"
-  ip_range     = "192.168.100.0/24"
+  network_id   = hcloud_network.us_east_network.id
+  network_zone = "us-east"
+  ip_range     = "192.168.200.0/24"
 }
 
 resource "hcloud_server_network" "de_node_network" {
@@ -47,7 +47,7 @@ resource "hcloud_server_network" "us_node_network" {
 
 resource "hcloud_server" "de_node" {
   count       = var.de_instances
-  name        = "${var.de_datacenter}-${var.de_server_type}-${count.index +1}"
+  name        = "${var.de_datacenter}-${var.de_server_type}-${count.index + 1}"
   image       = var.os_type
   server_type = var.de_server_type
   location    = var.de_datacenter
@@ -94,4 +94,29 @@ resource "hcloud_server" "us_node" {
     ipv6_enabled = true
   }
   user_data = file("user_data.yml")
+}
+
+# Cloudflare Record
+resource "cloudflare_record" "de_a_record" {
+  count   = var.de_instances
+  zone_id = var.cloudflare_zone_id
+  name    = "${var.de_datacenter}-node${count.index + 1}"
+  value   = hcloud_server.de_node[count.index].ipv4_address
+  type    = "A"
+}
+
+resource "cloudflare_record" "fi_a_record" {
+  count   = var.fi_instances
+  zone_id = var.cloudflare_zone_id
+  name    = "${var.fi_datacenter}-node${count.index + 1}"
+  value   = hcloud_server.fi_node[count.index].ipv4_address
+  type    = "A"
+}
+
+resource "cloudflare_record" "us_a_record" {
+  count   = var.us_instances
+  zone_id = var.cloudflare_zone_id
+  name    = "${var.us_datacenter}-node${count.index + 1}"
+  value   = hcloud_server.us_node[count.index].ipv4_address
+  type    = "A"
 }

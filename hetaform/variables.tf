@@ -2,12 +2,20 @@ variable "hcloud_token" {
 
 }
 
+variable "cloudflare_api_token" {
+
+}
+
+variable "cloudflare_zone_id" {
+
+}
+
 variable "de_datacenter" {
   default = "nbg1"
 }
 
 variable "fi_datacenter" {
-  default = "hil1"
+  default = "hel1"
 }
 
 variable "us_datacenter" {
